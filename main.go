@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 )
 
 func rgbGradient(x, y, w, h int) color.Color {
@@ -42,9 +43,20 @@ func loop(w fyne.Window) {
 
 func main() {
 	a := app.New()
-	w := a.NewWindow("Hello")
+	w := a.NewWindow("Viewport")
 
-	go loop(w)
+	editor := container.NewVBox(
+		canvas.NewText("first line of editor", color.Black),
+		canvas.NewText("second line of editor", color.Black),
+	)
+	viewport := canvas.NewCircle(color.RGBA{R: 255, G: 126, B: 126, A: 255})
 
+	content := container.NewHSplit(
+		container.NewVScroll(editor),
+		viewport,
+	)
+	content.Offset = 0.3
+
+	w.SetContent(content)
 	w.ShowAndRun()
 }

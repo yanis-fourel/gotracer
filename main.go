@@ -3,7 +3,6 @@ package main
 import (
 	"image"
 	"image/color"
-	"math/rand"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,46 +10,43 @@ import (
 	"fyne.io/fyne/v2/container"
 )
 
-func makeEditor() fyne.CanvasObject {
+func makeEditor(gt *GoTracer) fyne.CanvasObject {
 	return container.NewVScroll(container.NewVBox(
 		canvas.NewText("first line of editor", color.Black),
 		canvas.NewText("second line of editor", color.Black),
 	))
 }
 
-func makeViewport() fyne.CanvasObject {
-	img := image.NewRGBA(image.Rect(0, 0, 640, 480))
-	res := canvas.NewImageFromImage(img)
+func makeViewport(gt *GoTracer) fyne.CanvasObject {
+	gt.render.img = image.NewRGBA(image.Rect(0, 0, 640, 480))
+	render := canvas.NewImageFromImage(gt.render.img)
+	render.FillMode = canvas.ImageFillOriginal
 
 	go func() {
 		for {
-			for x := 0; x < 640; x++ {
-				for y := 0; y < 480; y++ {
-					img.Set(x, y, color.RGBA{
-						R: uint8(rand.Uint32() % 256),
-						G: uint8(rand.Uint32() % 256),
-						B: uint8(rand.Uint32() % 256),
-						A: 255,
-					})
-				}
-			}
-			res.Refresh()
+			<-gt.render.update
+			render.Refresh()
 		}
 	}()
 
-	return res
+	return render
 }
 
 func main() {
+	gt := NewGoTracer()
+
 	a := app.New()
 	w := a.NewWindow("Viewport")
 
 	content := container.NewHSplit(
-		makeEditor(),
-		makeViewport(),
+		makeEditor(gt),
+		makeViewport(gt),
 	)
 	content.Offset = 0.3
 
 	w.SetContent(content)
+
+	go gt.Run()
+
 	w.ShowAndRun()
 }

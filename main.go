@@ -23,11 +23,20 @@ type Model struct {
 }
 
 func initialModel() *Model {
+	spheres := [...]Sphere{
+		{
+			center: Vec3{0, 0, 10},
+			radius: 1,
+		},
+	}
+
 	return &Model{
 		render: Render{
 			img: image.NewRGBA(image.Rect(0, 0, 40, 64)),
 		},
-		scene: Scene{},
+		scene: Scene{
+			spheres: spheres[:],
+		},
 		cam: Camera{
 			origin: Vec3{0, 0, 0},
 			up:     Vec3Up,

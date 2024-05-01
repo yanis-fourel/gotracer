@@ -16,5 +16,5 @@ type Camera struct {
 
 type Sphere struct {
 	center Vec3
-	radius float32
+	radius float64
 }

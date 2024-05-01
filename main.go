@@ -25,7 +25,7 @@ type Model struct {
 func initialModel() *Model {
 	spheres := [...]Sphere{
 		{
-			center: Vec3{0, 0, 10},
+			center: Vec3{0, 0, 3},
 			radius: 1,
 		},
 	}

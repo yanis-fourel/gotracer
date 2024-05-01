@@ -11,7 +11,12 @@ func trace(r Ray, scene Scene) color.RGBA {
 	if impact == nil {
 		return color.RGBA{0, 0, 0, 0}
 	}
-	return color.RGBA{255, 255, 255, 255}
+	return color.RGBA{
+		uint8((impact.n.x + 1) * 127),
+		uint8((impact.n.y + 1) * 127),
+		uint8((impact.n.z + 1) * 127),
+		255,
+	}
 }
 
 func raycast(r Ray, scene Scene) *Impact {
@@ -31,15 +36,15 @@ func raycast(r Ray, scene Scene) *Impact {
 func renderScene(img *image.RGBA, scene Scene, cam Camera) {
 	right := cam.up.Cross(cam.fw)
 
-	aspect_ratio := float64(img.Rect.Dx()) / float64(img.Rect.Dy())
+	inv_aspect_ratio := float64(img.Rect.Dy()) / float64(img.Rect.Dx())
 
 	topleft := cam.origin.
 		Add(cam.fw).
-		Add(cam.up.Scaled(aspect_ratio * 0.5)).
+		Add(cam.up.Scaled(inv_aspect_ratio * 0.5)).
 		Add(right.Scaled(-0.5))
 
 	dx := right.Scaled(1 / float64(img.Rect.Dx()))
-	dy := cam.up.Scaled(-aspect_ratio / float64(img.Rect.Dy()))
+	dy := cam.up.Scaled(-inv_aspect_ratio / float64(img.Rect.Dy()))
 
 	for x := 0; x < img.Rect.Dx(); x++ {
 		for y := 0; y < img.Rect.Dy(); y++ {

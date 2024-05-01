@@ -10,8 +10,7 @@ import (
 )
 
 type Render = struct {
-	img    *image.RGBA
-	update chan bool
+	img *image.RGBA
 }
 
 // Type to indicate there is a new frame that should be rendered
@@ -19,15 +18,20 @@ type NewFrameMsg struct{}
 
 type Model struct {
 	render Render
-	// scene
-	// camera
+	scene  Scene
+	cam    Camera
 }
 
 func initialModel() *Model {
 	return &Model{
 		render: Render{
-			img:    image.NewRGBA(image.Rect(0, 0, 40, 64)),
-			update: make(chan bool, 1),
+			img: image.NewRGBA(image.Rect(0, 0, 40, 64)),
+		},
+		scene: Scene{},
+		cam: Camera{
+			origin: Vec3{0, 0, 0},
+			up:     Vec3Up,
+			fw:     Vec3Forward,
 		},
 	}
 }
@@ -70,8 +74,10 @@ func (m Model) View() string {
 
 func (m *Model) Run(p *tea.Program) {
 	for {
-		trace(m.render.img)
+		// TODO: Run that only when the scene or camera changed
+		renderScene(m.render.img, m.scene, m.cam)
 		p.Send(NewFrameMsg{})
+		return
 	}
 }
 

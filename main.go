@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -25,7 +26,7 @@ type Model struct {
 func initialModel() *Model {
 	spheres := [...]Sphere{
 		{
-			center: Vec3{0, 0, 3},
+			center: Vec3{0, 0, 2},
 			radius: 1,
 		},
 	}
@@ -65,11 +66,16 @@ func (m Model) View() string {
 	for x := range m.render.img.Bounds().Dx() {
 		for y := range m.render.img.Bounds().Dy() {
 			s += fmt.Sprintf(
-				"%s%sm ",
+				"%s%sm",
 				termenv.CSI,
 				termenv.ANSI256.FromColor(m.render.img.At(x, y)).Sequence(true),
 			)
 			s += " "
+
+			tmp := termenv.ANSI256.FromColor(m.render.img.At(x, y)).Sequence(true)
+			if strings.Contains(tmp, "232") {
+				fmt.Println(tmp, ": x=", x, ", y=", y, ", ", m.render.img.At(x, y))
+			}
 		}
 		s += "\n"
 	}

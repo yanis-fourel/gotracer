@@ -5,16 +5,17 @@ import (
 	"image/color"
 )
 
+// Returns the perceived color by a ray shot in the scene
 func trace(r Ray, scene Scene) color.RGBA {
 	impact := raycast(r, scene)
 
 	if impact == nil {
-		return color.RGBA{0, 0, 0, 0}
+		return color.RGBA{0, 127, 127, 255}
 	}
 	return color.RGBA{
-		uint8((impact.n.x + 1) * 127),
-		uint8((impact.n.y + 1) * 127),
-		uint8((impact.n.z + 1) * 127),
+		uint8((impact.n.x + 1) * 100),
+		uint8((impact.n.y + 1) * 100),
+		uint8((impact.n.z + 1) * 100),
 		255,
 	}
 }
@@ -50,8 +51,8 @@ func renderScene(img *image.RGBA, scene Scene, cam Camera) {
 		for y := 0; y < img.Rect.Dy(); y++ {
 			go func() {
 				target := topleft.
-					Add(dx.Scaled(float64(x))).
-					Add(dy.Scaled(float64(y)))
+					Add(dx.Scaled(float64(x) + 0.5)).
+					Add(dy.Scaled(float64(y) + 0.5))
 				ray := Ray{
 					ori: cam.origin,
 					dir: target.Sub(cam.origin).Normalized(),

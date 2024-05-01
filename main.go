@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
-	"math/rand"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -15,6 +13,9 @@ type Render = struct {
 	img    *image.RGBA
 	update chan bool
 }
+
+// Type to indicate there is a new frame that should be rendered
+type NewFrameMsg struct{}
 
 type Model struct {
 	render Render
@@ -43,7 +44,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	return m, tea.ClearScreen
+	return m, nil
 }
 
 func (m Model) View() string {
@@ -67,29 +68,17 @@ func (m Model) View() string {
 	return s
 }
 
-func (m *Model) Run() {
+func (m *Model) Run(p *tea.Program) {
 	for {
-		for x := 0; x < 640; x++ {
-			for y := 0; y < 480; y++ {
-				m.render.img.Set(x, y, color.RGBA{
-					R: uint8(rand.Uint32() % 256),
-					G: uint8(rand.Uint32() % 256),
-					B: uint8(rand.Uint32() % 256),
-					A: 255,
-				})
-			}
-		}
-		select {
-		case m.render.update <- true:
-		default:
-		}
+		trace(m.render.img)
+		p.Send(NewFrameMsg{})
 	}
 }
 
 func main() {
 	m := initialModel()
-	go m.Run()
 	p := tea.NewProgram(m)
+	go m.Run(p)
 	_, err := p.Run()
 	if err != nil {
 		log.Fatalf("Alas, there's been an error: %v", err)

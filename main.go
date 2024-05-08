@@ -4,20 +4,26 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
+	"golang.org/x/term"
+	// "github.com/muesli/termenv"
 )
 
 type Render = struct {
 	img *image.RGBA
+	// From 0 to 1
+	progress float32
 }
 
 // Type to indicate there is a new frame that should be rendered
 type NewFrameMsg struct{}
 
 type Model struct {
-	render Render
+	// Data of the render of the current image
+	render *Render
 	scene  Scene
 	cam    Camera
 }
@@ -25,15 +31,13 @@ type Model struct {
 func initialModel() *Model {
 	spheres := [...]Sphere{
 		{
-			center: Vec3{0, 0, 2},
+			center: Vec3{0, 0, 2.5},
 			radius: 1,
 		},
 	}
 
 	return &Model{
-		render: Render{
-			img: image.NewRGBA(image.Rect(0, 0, 40, 64)),
-		},
+		render: nil,
 		scene: Scene{
 			spheres: spheres[:],
 		},
@@ -45,25 +49,52 @@ func initialModel() *Model {
 	}
 }
 
-func (m Model) Init() tea.Cmd {
-	return nil
+type retraceImageMsg struct{}
+
+func RetraceImage() tea.Msg {
+	return retraceImageMsg{}
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+type checkRedrawMsg time.Time
+
+func checkRedrawCmd() tea.Cmd {
+	return tea.Tick(time.Millisecond*10, func(t time.Time) tea.Msg {
+		return checkRedrawMsg(t)
+	})
+}
+
+func (m Model) Init() tea.Cmd {
+	return RetraceImage
+}
+
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
 		}
+	case tea.WindowSizeMsg, retraceImageMsg:
+		return m, m.RetraceImage()
+	case checkRedrawMsg:
+		if m.render.progress < 1.0 {
+			return m, checkRedrawCmd()
+		}
 	}
+
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m *Model) View() string {
+	if m.render == nil {
+		return ""
+	}
+
 	s := ""
-	for x := range m.render.img.Bounds().Dx() {
-		for y := range m.render.img.Bounds().Dy() {
+	s += fmt.Sprintf("Size: %dx%d (%d pixels). Progress: %.2f%%\n", m.render.img.Rect.Dx(), m.render.img.Rect.Dy(), m.render.img.Rect.Dx()*m.render.img.Rect.Dy(), m.render.progress*100)
+
+	for y := range m.render.img.Bounds().Dy() {
+		for x := range m.render.img.Bounds().Dx() {
 			s += fmt.Sprintf(
 				"%s%sm",
 				termenv.CSI,
@@ -71,29 +102,41 @@ func (m Model) View() string {
 			)
 			s += " "
 		}
+		s += fmt.Sprintf(
+			"%s%sm ",
+			termenv.CSI,
+			termenv.ResetSeq,
+		)
 		s += "\n"
 	}
-	s += fmt.Sprintf(
-		"%s%sm ",
-		termenv.CSI,
-		termenv.ResetSeq,
-	)
 	return s
 }
 
-func (m *Model) Run(p *tea.Program) {
-	for {
-		// TODO: Run that only when the scene or camera changed
-		renderScene(m.render.img, m.scene, m.cam)
-		p.Send(NewFrameMsg{})
-		return
+func (m *Model) RetraceImage() tea.Cmd {
+
+	// TODO: if there is an ongoing tracing, interrupt it. Current approach
+	// replaces ongoing tracing, but it keeps going in the background until
+	// it's done, which is a waste of resources
+
+	width, height, err := term.GetSize(0)
+	if err != nil {
+		log.Fatalln("Error getting terminal size: ", err)
 	}
+	height -= 2
+
+	render := Render{
+		img:      image.NewRGBA(image.Rect(0, 0, width, height)),
+		progress: 0,
+	}
+	m.render = &render
+
+	go renderScene(m.render, m.scene, m.cam)
+	return checkRedrawCmd()
 }
 
 func main() {
 	m := initialModel()
 	p := tea.NewProgram(m)
-	go m.Run(p)
 	_, err := p.Run()
 	if err != nil {
 		log.Fatalf("Alas, there's been an error: %v", err)

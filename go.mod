@@ -5,7 +5,7 @@ go 1.22.1
 require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/muesli/termenv v0.15.2
-	github.com/ungerik/go3d v0.0.0-20220309204530-55ced4bcb334
+	golang.org/x/term v0.20.0
 )
 
 require (
@@ -20,7 +20,6 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 )

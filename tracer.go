@@ -1,7 +1,6 @@
 package main
 
 import (
-	"image"
 	"image/color"
 )
 
@@ -33,22 +32,25 @@ func raycast(r Ray, scene Scene) *Impact {
 	return res
 }
 
-// Runs raytracing algorithm to render the scene into the image
-func renderScene(img *image.RGBA, scene Scene, cam Camera) {
-	right := cam.up.Cross(cam.fw)
+func renderScene(r *Render, scene Scene, cam Camera) {
+	img := r.img
+	height := img.Bounds().Dy()
+	width := img.Bounds().Dx()
+	right := cam.fw.Cross(cam.up)
 
-	inv_aspect_ratio := float64(img.Rect.Dy()) / float64(img.Rect.Dx())
+	inv_aspect_ratio := float64(height) / float64(width)
 
 	topleft := cam.origin.
 		Add(cam.fw).
 		Add(cam.up.Scaled(inv_aspect_ratio * 0.5)).
 		Add(right.Scaled(-0.5))
 
-	dx := right.Scaled(1 / float64(img.Rect.Dx()))
-	dy := cam.up.Scaled(-inv_aspect_ratio / float64(img.Rect.Dy()))
+	dx := right.Scaled(1 / float64(width))
+	dy := cam.up.Scaled(-inv_aspect_ratio / float64(height))
 
-	for x := 0; x < img.Rect.Dx(); x++ {
-		for y := 0; y < img.Rect.Dy(); y++ {
+	doneChan := make(chan bool, 1000)
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
 			go func() {
 				target := topleft.
 					Add(dx.Scaled(float64(x) + 0.5)).
@@ -59,7 +61,15 @@ func renderScene(img *image.RGBA, scene Scene, cam Camera) {
 				}
 				color := trace(ray, scene)
 				img.Set(x, y, color)
+				doneChan <- true
 			}()
 		}
+	}
+
+	totalCount := width * height
+	doneCount := 0
+	for <-doneChan {
+		doneCount++
+		r.progress = float32(doneCount) / float32(totalCount)
 	}
 }

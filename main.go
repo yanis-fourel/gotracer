@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -68,14 +67,9 @@ func (m Model) View() string {
 			s += fmt.Sprintf(
 				"%s%sm",
 				termenv.CSI,
-				termenv.ANSI256.FromColor(m.render.img.At(x, y)).Sequence(true),
+				termenv.TrueColor.FromColor(m.render.img.At(x, y)).Sequence(true),
 			)
 			s += " "
-
-			tmp := termenv.ANSI256.FromColor(m.render.img.At(x, y)).Sequence(true)
-			if strings.Contains(tmp, "232") {
-				fmt.Println(tmp, ": x=", x, ", y=", y, ", ", m.render.img.At(x, y))
-			}
 		}
 		s += "\n"
 	}

@@ -1,4 +1,4 @@
 - Add other shape
 - Test shadows
 - Add reflection / more material option
-- Improve perf to allow for real-time camera movement
+- Improve perf to allow for real-time camera movement (limiting factor seems to be the creation of the string we return from the View() method)

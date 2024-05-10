@@ -29,17 +29,21 @@ type Model struct {
 }
 
 func initialModel() *Model {
-	spheres := [...]Sphere{
-		{
-			center: Vec3{0, 0, 2.5},
-			radius: 1,
-		},
-	}
-
 	return &Model{
 		render: nil,
 		scene: Scene{
-			spheres: spheres[:],
+			backgroundColor: RGB{0, 127, 127},
+			light: DirLight{
+				dir: Vec3{-0.5, -1, 1}.Normalized(),
+				col: RGB{255, 31, 31},
+			},
+			spheres: []Sphere{
+				{
+					center: Vec3{0, 0, 9},
+					radius: 1,
+					color:  RGB{255, 255, 255},
+				},
+			},
 		},
 		cam: Camera{
 			origin: Vec3{0, 0, 0},
@@ -130,7 +134,7 @@ func (m *Model) RetraceImage() tea.Cmd {
 	}
 	m.render = &render
 
-	go renderScene(m.render, m.scene, m.cam)
+	go renderScene(m.render, &m.scene, m.cam)
 	return checkRedrawCmd()
 }
 

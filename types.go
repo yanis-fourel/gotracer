@@ -5,7 +5,9 @@ type Ray struct {
 }
 
 type Scene struct {
-	spheres []Sphere
+	backgroundColor RGB
+	light           DirLight
+	spheres         []Sphere
 }
 
 type Camera struct {
@@ -14,7 +16,13 @@ type Camera struct {
 	fw     Vec3
 }
 
+type DirLight struct {
+	dir Vec3
+	col RGB
+}
+
 type Sphere struct {
 	center Vec3
 	radius float64
+	color  RGB
 }

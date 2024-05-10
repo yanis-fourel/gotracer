@@ -1,25 +1,36 @@
 package main
 
-import (
-	"image/color"
-)
-
 // Returns the perceived color by a ray shot in the scene
-func trace(r Ray, scene Scene) color.RGBA {
+func trace(r Ray, scene *Scene) RGB {
 	impact := raycast(r, scene)
 
 	if impact == nil {
-		return color.RGBA{0, 127, 127, 255}
+		return scene.backgroundColor
 	}
-	return color.RGBA{
-		uint8((impact.n.x + 1) * 100),
-		uint8((impact.n.y + 1) * 100),
-		uint8((impact.n.z + 1) * 100),
-		255,
-	}
+
+	lightcol := getLight(impact, scene)
+
+	return impact.col.MixSub(lightcol)
 }
 
-func raycast(r Ray, scene Scene) *Impact {
+// Returns the color of the light on the impact
+func getLight(impact *Impact, scene *Scene) RGB {
+	if impact.n.Dot(scene.light.dir) >= 0 {
+		return RGB{}
+	}
+	lightray := Ray{
+		ori: impact.p,
+		dir: scene.light.dir.Scaled(-1),
+	}
+	if raycast(lightray, scene) != nil {
+		return RGB{}
+	}
+
+	col := scene.light.col.Scaled(impact.n.Dot(lightray.dir))
+	return col
+}
+
+func raycast(r Ray, scene *Scene) *Impact {
 	var res *Impact
 
 	for i := range scene.spheres {
@@ -32,7 +43,7 @@ func raycast(r Ray, scene Scene) *Impact {
 	return res
 }
 
-func renderScene(r *Render, scene Scene, cam Camera) {
+func renderScene(r *Render, scene *Scene, cam Camera) {
 	img := r.img
 	height := img.Bounds().Dy()
 	width := img.Bounds().Dx()

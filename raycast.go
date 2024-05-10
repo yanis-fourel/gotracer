@@ -1,11 +1,15 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 type Impact struct {
 	dist float64
 	p    Vec3
 	n    Vec3
+	// color of the surface
+	col RGB
 }
 
 func RaycastSphere(r Ray, s Sphere) *Impact {
@@ -28,5 +32,5 @@ func RaycastSphere(r Ray, s Sphere) *Impact {
 
 	p := r.ori.Add(r.dir.Scaled(dist))
 	n := p.Sub(s.center).Normalized()
-	return &Impact{dist, p, n}
+	return &Impact{dist, p, n, s.color}
 }

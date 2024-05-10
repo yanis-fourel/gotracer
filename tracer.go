@@ -69,8 +69,8 @@ func renderScene(r *Render, scene *Scene, cam Camera) {
 
 	doneChan := make(chan bool, 1000)
 	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
-			go func() {
+		go func() {
+			for y := 0; y < height; y++ {
 				target := topleft.
 					Add(dx.Scaled(float64(x) + 0.5)).
 					Add(dy.Scaled(float64(y) + 0.5))
@@ -81,8 +81,8 @@ func renderScene(r *Render, scene *Scene, cam Camera) {
 				color := trace(ray, scene)
 				img.Set(x, y, color)
 				doneChan <- true
-			}()
-		}
+			}
+		}()
 	}
 
 	totalCount := width * height

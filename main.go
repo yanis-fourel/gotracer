@@ -32,16 +32,17 @@ func initialModel() *Model {
 	return &Model{
 		render: nil,
 		scene: Scene{
+			ambientLight:    RGB{31, 31, 31},
 			backgroundColor: RGB{0, 127, 127},
-			light: DirLight{
+			dirLight: DirLight{
 				dir: Vec3{-0.5, -1, 1}.Normalized(),
-				col: RGB{255, 31, 31},
+				col: RGB{255, 255, 255},
 			},
 			spheres: []Sphere{
 				{
 					center: Vec3{0, 0, 9},
 					radius: 1,
-					color:  RGB{255, 255, 255},
+					color:  RGB{255, 63, 63},
 				},
 			},
 		},

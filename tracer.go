@@ -15,19 +15,25 @@ func trace(r Ray, scene *Scene) RGB {
 
 // Returns the color of the light on the impact
 func getLight(impact *Impact, scene *Scene) RGB {
-	if impact.n.Dot(scene.light.dir) >= 0 {
+	dirLightCol := getDirLight(impact, scene)
+
+	res := scene.ambientLight.MixAdd(dirLightCol)
+	return res
+}
+
+// Returns the color of the global directional light on the impact
+func getDirLight(impact *Impact, scene *Scene) RGB {
+	if impact.n.Dot(scene.dirLight.dir) >= 0 {
 		return RGB{}
 	}
 	lightray := Ray{
 		ori: impact.p,
-		dir: scene.light.dir.Scaled(-1),
+		dir: scene.dirLight.dir.Scaled(-1),
 	}
 	if raycast(lightray, scene) != nil {
 		return RGB{}
 	}
-
-	col := scene.light.col.Scaled(impact.n.Dot(lightray.dir))
-	return col
+	return scene.dirLight.col.Scaled(impact.n.Dot(lightray.dir))
 }
 
 func raycast(r Ray, scene *Scene) *Impact {

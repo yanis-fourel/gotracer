@@ -29,3 +29,10 @@ func (a RGB) MixSub(b RGB) RGB {
 	a.B = uint8(uint16(a.B) * uint16(b.B) / 255)
 	return a
 }
+
+func (a RGB) MixAdd(b RGB) RGB {
+	a.R = 255 - uint8((float64(255-a.R)/255*float64(255-b.R)/255)*255)
+	a.G = 255 - uint8((float64(255-a.G)/255*float64(255-b.G)/255)*255)
+	a.B = 255 - uint8((float64(255-a.B)/255*float64(255-b.B)/255)*255)
+	return a
+}

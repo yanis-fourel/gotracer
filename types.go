@@ -6,7 +6,8 @@ type Ray struct {
 
 type Scene struct {
 	backgroundColor RGB
-	light           DirLight
+	ambientLight    RGB
+	dirLight        DirLight
 	spheres         []Sphere
 }
 

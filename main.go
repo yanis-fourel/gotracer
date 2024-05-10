@@ -32,7 +32,7 @@ func initialModel() *Model {
 	return &Model{
 		render: nil,
 		scene: Scene{
-			ambientLight:    RGB{31, 31, 31},
+			ambientLight:    RGB{0, 31, 31},
 			backgroundColor: RGB{0, 127, 127},
 			dirLight: DirLight{
 				dir: Vec3{-0.5, -1, 1}.Normalized(),
@@ -40,7 +40,7 @@ func initialModel() *Model {
 			},
 			spheres: []Sphere{
 				{
-					center: Vec3{0, 0, 9},
+					center: Vec3{0, 0, 4.5},
 					radius: 1,
 					color:  RGB{255, 63, 63},
 				},

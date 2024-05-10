@@ -55,15 +55,17 @@ func renderScene(r *Render, scene *Scene, cam Camera) {
 	width := img.Bounds().Dx()
 	right := cam.up.Cross(cam.fw)
 
-	inv_aspect_ratio := float64(height) / float64(width)
+	// We assume each cell is twice as high as it is wide
+	termCellAspectRatio := float64(2)
+	invAspectRatio := float64(height) / float64(width) * termCellAspectRatio
 
 	topleft := cam.origin.
 		Add(cam.fw).
-		Add(cam.up.Scaled(inv_aspect_ratio * 0.5)).
+		Add(cam.up.Scaled(invAspectRatio * 0.5)).
 		Add(right.Scaled(-0.5))
 
 	dx := right.Scaled(1 / float64(width))
-	dy := cam.up.Scaled(-inv_aspect_ratio / float64(height))
+	dy := cam.up.Scaled(-invAspectRatio / float64(height))
 
 	doneChan := make(chan bool, 1000)
 	for x := 0; x < width; x++ {

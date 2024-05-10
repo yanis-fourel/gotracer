@@ -36,7 +36,7 @@ func renderScene(r *Render, scene Scene, cam Camera) {
 	img := r.img
 	height := img.Bounds().Dy()
 	width := img.Bounds().Dx()
-	right := cam.fw.Cross(cam.up)
+	right := cam.up.Cross(cam.fw)
 
 	inv_aspect_ratio := float64(height) / float64(width)
 

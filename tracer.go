@@ -8,9 +8,31 @@ func trace(r Ray, scene *Scene) RGB {
 		return scene.backgroundColor
 	}
 
+	// return debug_distanceToColor(impact.dist).MixSub(debug_normToColor(impact.n))
+	// return debug_distanceToColor(impact.dist)
+	// return debug_normToColor(impact.n)
+
 	lightcol := getLight(impact, scene)
 
 	return impact.col.MixSub(lightcol)
+}
+
+// The closer, the whiter. The further, the darker
+func debug_distanceToColor(d float64) RGB {
+	f := d * 32
+	if f > 200 {
+		return RGB{200, 200, 200}
+	}
+	u := uint8(f)
+	return RGB{u, u, u}
+}
+
+func debug_normToColor(n Vec3) RGB {
+	return RGB{
+		uint8(127 + n.x*127),
+		uint8(127 + n.y*127),
+		uint8(127 + n.z*127),
+	}
 }
 
 // Returns the color of the light on the impact
@@ -39,8 +61,14 @@ func getDirLight(impact *Impact, scene *Scene) RGB {
 func raycast(r Ray, scene *Scene) *Impact {
 	var res *Impact
 
-	for i := range scene.spheres {
-		r := RaycastSphere(r, scene.spheres[i])
+	for _, sphere := range scene.spheres {
+		r := RaycastSphere(r, sphere)
+		if r != nil && (res == nil || r.dist < res.dist) {
+			res = r
+		}
+	}
+	for _, plane := range scene.planes {
+		r := RaycastPlane(r, plane)
 		if r != nil && (res == nil || r.dist < res.dist) {
 			res = r
 		}

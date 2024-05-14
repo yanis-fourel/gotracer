@@ -34,3 +34,26 @@ func RaycastSphere(r Ray, s Sphere) *Impact {
 	n := p.Sub(s.center).Normalized()
 	return &Impact{dist, p, n, s.color}
 }
+
+func RaycastPlane(r Ray, s Plane) *Impact {
+	if r.dir.Dot(s.norm) > 0 {
+		return nil
+	}
+	denom := s.norm.Dot(r.dir)
+	if math.Abs(denom) < math.SmallestNonzeroFloat64 {
+		return nil
+	}
+
+	d := s.point.Sub(r.ori).Dot(s.norm) / denom
+	if d < 0 {
+		return nil
+	}
+
+	p := r.ori.Add(r.dir.Scaled(d))
+	return &Impact{
+		d,
+		p,
+		s.norm,
+		s.color,
+	}
+}

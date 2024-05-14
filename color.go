@@ -1,7 +1,25 @@
 package main
 
+import (
+	"encoding/hex"
+	"log"
+)
+
 type RGB struct {
 	R, G, B uint8
+}
+
+func RGBFrom(hexadecimal string) RGB {
+	if hexadecimal[0] == '#' {
+		hexadecimal = hexadecimal[1:]
+	}
+	bytes := make([]byte, 3)
+	n, err := hex.Decode(bytes, []byte(hexadecimal))
+	if err != nil || n != 3 {
+		log.Fatalf("Oopsie, failed to decode color: %v, %v\n", err, bytes)
+	}
+
+	return RGB{bytes[0], bytes[1], bytes[2]}
 }
 
 func (c RGB) RGBA() (r, g, b, a uint32) {

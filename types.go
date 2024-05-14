@@ -9,6 +9,7 @@ type Scene struct {
 	ambientLight    RGB
 	dirLight        DirLight
 	spheres         []Sphere
+	planes          []Plane
 }
 
 type Camera struct {
@@ -26,4 +27,10 @@ type Sphere struct {
 	center Vec3
 	radius float64
 	color  RGB
+}
+
+type Plane struct {
+	point Vec3
+	norm  Vec3
+	color RGB
 }

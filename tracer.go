@@ -14,7 +14,20 @@ func trace(r Ray, scene *Scene) RGB {
 
 	lightcol := getLight(impact, scene)
 
-	return impact.col.MixSub(lightcol)
+	color := impact.mat.color.MixSub(lightcol)
+
+	if impact.mat.reflection > 0.01 {
+		reflectRay := Ray{
+			ori: impact.p,
+			dir: r.dir.Sub(impact.n.Scaled(2 * r.dir.Dot(impact.n))),
+		}
+		reflectCol := trace(reflectRay, scene)
+
+		color = color.Scaled(1 - impact.mat.reflection)
+		color = color.MixAdd(reflectCol.Scaled(impact.mat.reflection))
+	}
+
+	return color
 }
 
 // The closer, the whiter. The further, the darker

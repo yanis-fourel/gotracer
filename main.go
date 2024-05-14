@@ -32,7 +32,7 @@ func initialModel() *Model {
 	return &Model{
 		render: nil,
 		scene: Scene{
-			ambientLight:    RGB{63, 63, 63},
+			ambientLight:    RGB{100, 100, 100},
 			backgroundColor: RGB{},
 			dirLight: DirLight{
 				dir: Vec3{-2, -1, 2}.Normalized(),
@@ -40,21 +40,35 @@ func initialModel() *Model {
 			},
 			spheres: []Sphere{
 				{
-					center: Vec3{0, 1.2, 4.8},
+					center: Vec3{-1.5, 1.2, 7},
 					radius: 1,
-					color:  RGB{255, 63, 63},
+					mat: Material{
+						color:      RGB{255, 63, 63},
+						reflection: 0,
+					},
+				},
+				{
+					center: Vec3{1.5, 1.2, 5},
+					radius: 1,
+					mat: Material{
+						color:      RGB{255, 63, 63},
+						reflection: 0.2,
+					},
 				},
 			},
 			planes: []Plane{
 				{
 					point: Vec3{0, 0, 0},
 					norm:  Vec3Up,
-					color: RGBFrom("#48507A"),
+					mat: Material{
+						color:      RGBFrom("#9090BA"),
+						reflection: 0.7,
+					},
 				},
 			},
 		},
 		cam: Camera{
-			origin: Vec3{0, 1.2, 0},
+			origin: Vec3{0, 1.2, -1},
 			up:     Vec3Up,
 			fw:     Vec3Forward,
 		},

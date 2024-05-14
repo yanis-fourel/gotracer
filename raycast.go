@@ -8,8 +8,7 @@ type Impact struct {
 	dist float64
 	p    Vec3
 	n    Vec3
-	// color of the surface
-	col RGB
+	mat  Material
 }
 
 func RaycastSphere(r Ray, s Sphere) *Impact {
@@ -32,7 +31,7 @@ func RaycastSphere(r Ray, s Sphere) *Impact {
 
 	p := r.ori.Add(r.dir.Scaled(dist))
 	n := p.Sub(s.center).Normalized()
-	return &Impact{dist, p, n, s.color}
+	return &Impact{dist, p, n, s.mat}
 }
 
 func RaycastPlane(r Ray, s Plane) *Impact {
@@ -54,6 +53,6 @@ func RaycastPlane(r Ray, s Plane) *Impact {
 		d,
 		p,
 		s.norm,
-		s.color,
+		s.mat,
 	}
 }

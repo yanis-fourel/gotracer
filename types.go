@@ -23,14 +23,22 @@ type DirLight struct {
 	col RGB
 }
 
+type Material struct {
+	// Surface color
+	color RGB
+
+	// 0 to 1
+	reflection float64
+}
+
 type Sphere struct {
 	center Vec3
 	radius float64
-	color  RGB
+	mat    Material
 }
 
 type Plane struct {
 	point Vec3
 	norm  Vec3
-	color RGB
+	mat   Material
 }

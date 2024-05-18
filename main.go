@@ -23,6 +23,9 @@ type Model struct {
 	render *Render
 	scene  Scene
 	cam    Camera
+
+	mousex, mousey int
+	isClicking     bool
 }
 
 func initialModel() *Model {
@@ -66,8 +69,8 @@ func initialModel() *Model {
 		},
 		cam: Camera{
 			origin: Vec3{0, 1.2, -1},
-			up:     Vec3Up,
-			fw:     Vec3Forward,
+			up:     Vec3Up,      //Vec3{-0.05, 1, 0.1}.Normalized(),
+			fw:     Vec3Forward, //Vec3{-0.1, -0.2, 1}.Normalized(),
 		},
 	}
 }
@@ -97,16 +100,46 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "w":
-			m.cam.origin = m.cam.origin.Add(Vec3Forward.Scaled(0.5))
+			m.cam.origin = m.cam.origin.Add(m.cam.fw.Scaled(0.5))
 			return m, m.RetraceImage()
 		case "a":
-			m.cam.origin = m.cam.origin.Add(Vec3Right.Scaled(-0.5))
+			m.cam.origin = m.cam.origin.Add(m.cam.up.Cross(m.cam.fw).Scaled(-0.5))
 			return m, m.RetraceImage()
 		case "s":
-			m.cam.origin = m.cam.origin.Add(Vec3Forward.Scaled(-0.5))
+			m.cam.origin = m.cam.origin.Add(m.cam.fw.Scaled(-0.5))
 			return m, m.RetraceImage()
 		case "d":
-			m.cam.origin = m.cam.origin.Add(Vec3Right.Scaled(0.5))
+			m.cam.origin = m.cam.origin.Add(m.cam.up.Cross(m.cam.fw).Scaled(0.5))
+			return m, m.RetraceImage()
+		case "e":
+			m.cam.origin = m.cam.origin.Add(m.cam.up.Scaled(0.5))
+			return m, m.RetraceImage()
+		case "q":
+			m.cam.origin = m.cam.origin.Add(m.cam.up.Scaled(-0.5))
+			return m, m.RetraceImage()
+		}
+	case tea.MouseMsg:
+		switch msg.Action {
+		case tea.MouseActionPress:
+			m.isClicking = true
+			m.mousex = msg.X
+			m.mousey = msg.Y
+			return m, nil
+		case tea.MouseActionRelease:
+			m.isClicking = false
+			return m, nil
+		case tea.MouseActionMotion:
+			if !m.isClicking {
+				return m, nil
+			}
+			dx := msg.X - m.mousex
+			dy := msg.Y - m.mousey
+
+			m.cam.fw = m.cam.fw.RotatedAroundY(float64(dx) * 0.01)
+			m.cam.fw = m.cam.fw.RotatedAroundX(float64(dy) * 0.01)
+			m.cam.up = m.cam.up.RotatedAroundX(float64(dy) * 0.01)
+			m.mousex = msg.X
+			m.mousey = msg.Y
 			return m, m.RetraceImage()
 		}
 	case tea.WindowSizeMsg, retraceImageMsg:
@@ -166,7 +199,7 @@ func main() {
 	// fmt.Println(img.String())
 
 	m := initialModel()
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, tea.WithMouseAllMotion())
 	_, err := p.Run()
 	if err != nil {
 		log.Fatalf("Alas, there's been an error: %v", err)

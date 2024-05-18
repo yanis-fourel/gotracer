@@ -55,3 +55,19 @@ func (v Vec3) Length() float64 {
 func (v Vec3) LengthSqr() float64 {
 	return v.x*v.x + v.y*v.y + v.z*v.z
 }
+
+func (v Vec3) RotatedAroundX(rad float64) Vec3 {
+	return Vec3{
+		v.x,
+		v.y*math.Cos(rad) - v.z*math.Sin(rad),
+		v.y*math.Sin(rad) + v.z*math.Cos(rad),
+	}
+}
+
+func (v Vec3) RotatedAroundY(rad float64) Vec3 {
+	return Vec3{
+		v.z*math.Sin(rad) + v.x*math.Cos(rad),
+		v.y,
+		v.z*math.Cos(rad) - v.x*math.Sin(rad),
+	}
+}

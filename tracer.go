@@ -92,8 +92,8 @@ func raycast(r Ray, scene *Scene) *Impact {
 
 func renderScene(r *Render, scene *Scene, cam Camera) {
 	img := r.img
-	height := img.Bounds().Dy()
-	width := img.Bounds().Dx()
+	height := img.height
+	width := img.width
 	right := cam.up.Cross(cam.fw)
 
 	// We assume each cell is twice as high as it is wide

@@ -2,18 +2,15 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"log"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/muesli/termenv"
 	"golang.org/x/term"
-	// "github.com/muesli/termenv"
 )
 
 type Render = struct {
-	img *image.RGBA
+	img RenderImg
 	// From 0 to 1
 	progress float32
 }
@@ -115,34 +112,22 @@ func (m *Model) View() string {
 	if m.render == nil {
 		return ""
 	}
-
-	s := ""
-	s += fmt.Sprintf("Size: %dx%d (%d pixels). Progress: %.2f%%\n", m.render.img.Rect.Dx(), m.render.img.Rect.Dy(), m.render.img.Rect.Dx()*m.render.img.Rect.Dy(), m.render.progress*100)
-
-	for y := range m.render.img.Bounds().Dy() {
-		for x := range m.render.img.Bounds().Dx() {
-			s += fmt.Sprintf(
-				"%s%sm",
-				termenv.CSI,
-				termenv.TrueColor.FromColor(m.render.img.At(x, y)).Sequence(true),
-			)
-			s += " "
-		}
-		s += fmt.Sprintf(
-			"%s%sm ",
-			termenv.CSI,
-			termenv.ResetSeq,
-		)
-		s += "\n"
-	}
-	return s
+	return fmt.Sprintf(
+		"Size: %dx%d (%d pixels). Progress: %.2f%%\n%s",
+		m.render.img.width,
+		m.render.img.height,
+		m.render.img.width*m.render.img.height,
+		m.render.progress*100,
+		m.render.img.String(),
+	)
 }
 
 func (m *Model) RetraceImage() tea.Cmd {
 
 	// TODO: if there is an ongoing tracing, interrupt it. Current approach
 	// replaces ongoing tracing, but it keeps going in the background until
-	// it's done, which is a waste of resources
+	// it's done, which is a waste of resources and prevents from re-using
+	// the same RenderImg
 
 	width, height, err := term.GetSize(0)
 	if err != nil {
@@ -151,7 +136,7 @@ func (m *Model) RetraceImage() tea.Cmd {
 	height -= 2
 
 	render := Render{
-		img:      image.NewRGBA(image.Rect(0, 0, width, height)),
+		img:      NewRenderImg(width, height, m.scene.backgroundColor),
 		progress: 0,
 	}
 	m.render = &render
@@ -161,6 +146,13 @@ func (m *Model) RetraceImage() tea.Cmd {
 }
 
 func main() {
+	// img := NewRenderImg(10, 5, RGB{})
+	// img.Set(5, 0, RGB{255, 0, 0})
+	// img.Set(2, 3, RGB{0, 255, 0})
+	// img.Set(9, 4, RGB{0, 0, 255})
+	// img.Set(0, 0, RGB{255, 255, 255})
+	// fmt.Println(img.String())
+
 	m := initialModel()
 	p := tea.NewProgram(m)
 	_, err := p.Run()

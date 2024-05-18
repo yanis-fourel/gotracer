@@ -96,6 +96,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "w":
+			m.cam.origin = m.cam.origin.Add(Vec3Forward.Scaled(0.5))
+			return m, m.RetraceImage()
+		case "a":
+			m.cam.origin = m.cam.origin.Add(Vec3Right.Scaled(-0.5))
+			return m, m.RetraceImage()
+		case "s":
+			m.cam.origin = m.cam.origin.Add(Vec3Forward.Scaled(-0.5))
+			return m, m.RetraceImage()
+		case "d":
+			m.cam.origin = m.cam.origin.Add(Vec3Right.Scaled(0.5))
+			return m, m.RetraceImage()
 		}
 	case tea.WindowSizeMsg, retraceImageMsg:
 		return m, m.RetraceImage()

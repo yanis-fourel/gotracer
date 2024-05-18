@@ -120,6 +120,11 @@ func renderScene(r *Render, scene *Scene, cam Camera) {
 					dir: target.Sub(cam.origin).Normalized(),
 				}
 				color := trace(ray, scene)
+
+				if r.stop {
+					doneChan <- true
+					return
+				}
 				img.Set(x, y, color)
 				doneChan <- true
 			}
@@ -129,6 +134,9 @@ func renderScene(r *Render, scene *Scene, cam Camera) {
 	totalCount := width * height
 	doneCount := 0
 	for <-doneChan {
+		if r.stop {
+			return
+		}
 		doneCount++
 		r.progress = float32(doneCount) / float32(totalCount)
 	}

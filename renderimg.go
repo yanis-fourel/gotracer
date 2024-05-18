@@ -19,7 +19,7 @@ func (img *RenderImg) String() string {
 	return string(img.buff)
 }
 
-func NewRenderImg(width, height int, initcol RGB) RenderImg {
+func NewRenderImg(width, height int, initcol RGB) *RenderImg {
 	res := RenderImg{
 		width,
 		height,
@@ -28,7 +28,7 @@ func NewRenderImg(width, height int, initcol RGB) RenderImg {
 	line := bytes.Repeat([]byte(padded(colorToStr(initcol))), width+1)
 	copy(line[len(line)-CellLength:], newLine())
 	res.buff = bytes.Repeat(line, height)
-	return res
+	return &res
 }
 
 func (img *RenderImg) offsetAt(x, y int) int {

@@ -10,9 +10,10 @@ import (
 )
 
 type Render = struct {
-	img RenderImg
+	img *RenderImg
 	// From 0 to 1
 	progress float32
+	stop     bool
 }
 
 // Type to indicate there is a new frame that should be rendered
@@ -137,6 +138,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.cam.fw = m.cam.fw.RotatedAroundY(float64(dx) * 0.01)
 			m.cam.fw = m.cam.fw.RotatedAroundX(float64(dy) * 0.01)
+			// This is not really correct, we should rotate it around
+			// cam.up.Cross(cam.fw)
 			m.cam.up = m.cam.up.RotatedAroundX(float64(dy) * 0.01)
 			m.mousex = msg.X
 			m.mousey = msg.Y
@@ -174,14 +177,24 @@ func (m *Model) RetraceImage() tea.Cmd {
 	// it's done, which is a waste of resources and prevents from re-using
 	// the same RenderImg
 
+	if m.render != nil {
+		m.render.stop = true
+	}
+
 	width, height, err := term.GetSize(0)
 	if err != nil {
 		log.Fatalln("Error getting terminal size: ", err)
 	}
 	height -= 2
 
+	var img *RenderImg
+	if m.render != nil && m.render.img.width == width && m.render.img.height == height {
+		img = m.render.img
+	} else {
+		img = NewRenderImg(width, height, m.scene.backgroundColor)
+	}
 	render := Render{
-		img:      NewRenderImg(width, height, m.scene.backgroundColor),
+		img:      img,
 		progress: 0,
 	}
 	m.render = &render
